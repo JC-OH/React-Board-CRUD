@@ -45,7 +45,12 @@ class BoardItem extends Component {
         brdno: '',
         brdtitle: '',
         brdwriter: '',
-        brddate: ''
+        brddate: '',
+        onRemove: () => console.warn('onRemove not defined')
+    };
+    handleRemove = () => {
+        const { row, onRemove } = this.props;
+        onRemove(row.brdno);
     };
 
     render() {
@@ -55,6 +60,7 @@ class BoardItem extends Component {
                 <td>{this.props.row.brdtitle}</td>
                 <td>{this.props.row.brdwriter}</td>
                 <td>{this.props.row.brddate.toLocaleDateString('ko-KR')}</td>
+                <td><button onClick={this.handleRemove}>X</button></td>
             </tr>
         );
     }
@@ -83,6 +89,12 @@ class App extends Component {
         })
     }
 
+    handleRemoveData = (brdno) => {
+        this.setState({
+            boards: this.state.boards.filter(row => row.brdno !== brdno)
+        })
+    }
+
     render() {
         // this는 자바스크립트에서 자기 자신(Component)을 의미한다.
         // const boards = this.state. boards;
@@ -100,11 +112,12 @@ class App extends Component {
                         <td>Title</td>
                         <td>Name</td>
                         <td>Date</td>
+                        <td>Funcs</td>
                     </tr>
                 </thead>
                 <tbody>
                 {
-                    boards.map(row=>(<BoardItem key={row.brdno} row={row} />))
+                    boards.map(row=>(<BoardItem key={row.brdno} row={row} onRemove={this.handleRemoveData}/>))
                 }
                 </tbody>
                 </table>
