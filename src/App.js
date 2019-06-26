@@ -27,6 +27,11 @@ class BoardForm extends Component {
         })
     };
 
+    handleEditView= (row) => {
+        console.log(row);
+        this.setState(row);
+    }
+
     render() {
         return (
             <form onSubmit={this.handleSubmit}>
@@ -52,12 +57,16 @@ class BoardItem extends Component {
         const { row, onRemove } = this.props;
         onRemove(row.brdno);
     };
+    handleSelectRow = () => {
+        const { row, onSelect } = this.props;
+        onSelect(row);
+    }
 
     render() {
         return (
             <tr>
                 <td>{this.props.row.brdno}</td>
-                <td>{this.props.row.brdtitle}</td>
+                <td onClick={this.handleSelectRow}>{this.props.row.brdtitle}</td>
                 <td>{this.props.row.brdwriter}</td>
                 <td>{this.props.row.brddate.toLocaleDateString('ko-KR')}</td>
                 <td><button onClick={this.handleRemove}>X</button></td>
@@ -82,17 +91,27 @@ class App extends Component {
                 { brdno: 2, brdwriter: 'So SiNo', brdtitle: 'Founder for two countries', brddate: new Date() }
             ]
     }
+    boardForm = React.createRef();
+
     handleSaveData = (data) => {
-        this.setState({
-            maxNo: this.state.maxNo+1,
-            boards: this.state.boards.concat({ brdno: this.state.maxNo++, brddate: new Date(), ...data })
-        })
+        let boards = this.state.boards;
+        if (data.brdno ===null || data.brdno==='' || data.brdno===undefined) { // new : Insert
+            this.setState({
+                maxNo: this.state.maxNo+1,
+                boards: this.state.boards.concat({ brdno: this.state.maxNo++, brddate: new Date(), ...data })
+            })
+        } else {
+            this.setState({ boards: boards.map(row => data.brdno === row.brdno ? {...data }: row) })
+        }
     }
 
     handleRemoveData = (brdno) => {
         this.setState({
             boards: this.state.boards.filter(row => row.brdno !== brdno)
         })
+    }
+    handleSelectData = (row) => {
+        this.boardForm.current.handleEditView(row);
     }
 
     render() {
@@ -104,7 +123,7 @@ class App extends Component {
         });
         return (
             <div>
-                <BoardForm onSaveData={this.handleSaveData}/>
+                <BoardForm onSaveData={this.handleSaveData} ref={this.boardForm}/>
                 <table border="1">
                 <thead>
                     <tr>
@@ -117,7 +136,7 @@ class App extends Component {
                 </thead>
                 <tbody>
                 {
-                    boards.map(row=>(<BoardItem key={row.brdno} row={row} onRemove={this.handleRemoveData}/>))
+                    boards.map(row=>(<BoardItem key={row.brdno} row={row} onRemove={this.handleRemoveData} onSelect={this.handleSelectData}/>))
                 }
                 </tbody>
                 </table>
